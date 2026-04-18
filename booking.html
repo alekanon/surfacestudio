@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book et møde — Surface Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#0a0a0a;
+  --s1:#0f0e0c;
+  --s3:#191714;
+  --white:#f5f3ef;
+  --cream:#ede9e2;
+  --stone:#c8c0b4;
+  --accent:#b8a898;
+  --serif:'Cormorant Garamond',serif;
+  --sans:'DM Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:var(--sans);font-weight:300;min-height:100vh}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1.5rem 3rem}
+nav::before{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,10,10,0.92),transparent);pointer-events:none}
+.nav-logo{font-family:var(--serif);font-size:1.3rem;font-weight:300;letter-spacing:0.15em;text-transform:uppercase;color:var(--white);text-decoration:none;position:relative;z-index:1}
+.nav-back{font-size:0.78rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--stone);text-decoration:none;position:relative;z-index:1;transition:color 0.3s;display:flex;align-items:center;gap:0.5rem}
+.nav-back:hover{color:var(--white)}
+
+/* PAGE LAYOUT */
+.booking-page{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;padding-top:6rem}
+
+/* LEFT PANEL */
+.booking-left{background:var(--s3);padding:5rem 4rem;display:flex;flex-direction:column;justify-content:center;border-right:0.5px solid rgba(200,192,180,0.1)}
+.booking-eyebrow{font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--stone);margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
+.booking-eyebrow::before{content:'';width:2rem;height:0.5px;background:var(--stone)}
+.booking-title{font-family:var(--serif);font-size:clamp(2.8rem,4vw,4rem);font-weight:300;line-height:1.05;color:var(--white);margin-bottom:1.5rem}
+.booking-title em{font-style:italic;color:var(--accent)}
+.booking-sub{font-size:0.88rem;line-height:1.9;color:var(--stone);max-width:380px;margin-bottom:3rem}
+.booking-perks{display:flex;flex-direction:column;gap:1rem}
+.perk{display:flex;align-items:flex-start;gap:1rem}
+.perk-dot{width:4px;height:4px;border-radius:50%;background:var(--accent);margin-top:0.55rem;flex-shrink:0}
+.perk-text{font-size:0.82rem;line-height:1.7;color:var(--stone)}
+
+/* RIGHT PANEL — booking form */
+.booking-right{background:var(--black);padding:5rem 4rem;display:flex;flex-direction:column;justify-content:center;overflow-y:auto}
+
+/* STEP SYSTEM */
+.steps-indicator{display:flex;gap:0.5rem;margin-bottom:3rem;align-items:center}
+.step-dot{width:6px;height:6px;border-radius:50%;background:rgba(200,192,180,0.2);transition:all 0.3s}
+.step-dot.active{background:var(--stone);width:20px;border-radius:3px}
+.step-dot.done{background:var(--accent)}
+.step-label{font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--stone);margin-left:0.5rem}
+
+.step{display:none}
+.step.active{display:block}
+
+.step-title{font-family:var(--serif);font-size:1.8rem;font-weight:300;color:var(--white);margin-bottom:0.5rem}
+.step-sub{font-size:0.82rem;color:var(--stone);margin-bottom:2rem;line-height:1.7}
+
+/* SERVICE CARDS */
+.service-options{display:flex;flex-direction:column;gap:0.75rem;margin-bottom:2rem}
+.service-option{border:0.5px solid rgba(200,192,180,0.15);padding:1.2rem 1.5rem;cursor:pointer;transition:all 0.25s;display:flex;align-items:center;justify-content:space-between}
+.service-option:hover{border-color:rgba(200,192,180,0.4);background:rgba(255,255,255,0.02)}
+.service-option.selected{border-color:var(--stone);background:rgba(200,192,180,0.05)}
+.service-option input[type=radio]{display:none}
+.service-option-name{font-family:var(--serif);font-size:1.1rem;font-weight:300;color:var(--white)}
+.service-option-desc{font-size:0.75rem;color:var(--stone);margin-top:0.2rem}
+.service-check{width:18px;height:18px;border:0.5px solid rgba(200,192,180,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all 0.25s;flex-shrink:0}
+.service-option.selected .service-check{border-color:var(--stone);background:var(--stone)}
+.service-option.selected .service-check::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--black)}
+
+/* CALENDAR */
+.calendar-wrap{margin-bottom:2rem}
+.cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+.cal-month{font-family:var(--serif);font-size:1.2rem;font-weight:300;color:var(--white)}
+.cal-nav{background:none;border:0.5px solid rgba(200,192,180,0.2);color:var(--stone);width:32px;height:32px;cursor:pointer;font-size:0.9rem;transition:all 0.2s;display:flex;align-items:center;justify-content:center}
+.cal-nav:hover{border-color:var(--stone);color:var(--white)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day-name{font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(200,192,180,0.4);text-align:center;padding:0.4rem 0}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:0.82rem;color:var(--stone);cursor:pointer;transition:all 0.2s;border:0.5px solid transparent}
+.cal-day:hover:not(.empty):not(.past){background:rgba(200,192,180,0.08);border-color:rgba(200,192,180,0.2);color:var(--white)}
+.cal-day.selected{background:var(--stone);color:var(--black);font-weight:500}
+.cal-day.today{color:var(--accent)}
+.cal-day.past{opacity:0.25;cursor:default}
+.cal-day.empty{cursor:default}
+
+/* TIME SLOTS */
+.time-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:2rem}
+.time-slot{border:0.5px solid rgba(200,192,180,0.15);padding:0.6rem;text-align:center;font-size:0.78rem;color:var(--stone);cursor:pointer;transition:all 0.2s;letter-spacing:0.05em}
+.time-slot:hover{border-color:rgba(200,192,180,0.4);color:var(--white)}
+.time-slot.selected{border-color:var(--stone);background:rgba(200,192,180,0.08);color:var(--white)}
+
+/* DETAILS FORM */
+.form-group{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.1rem}
+.form-group label{font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--stone)}
+.form-group input,.form-group textarea{background:rgba(255,255,255,0.03);border:0.5px solid rgba(200,192,180,0.18);color:var(--white);padding:0.85rem 1rem;font-family:var(--sans);font-size:0.85rem;outline:none;transition:border-color 0.3s;width:100%}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--stone)}
+.form-group textarea{resize:vertical;min-height:90px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+
+/* BUTTONS */
+.btn-next{background:var(--white);color:var(--black);border:none;padding:1rem 2rem;font-family:var(--sans);font-size:0.78rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.3s;font-weight:500;width:100%}
+.btn-next:hover{background:var(--cream)}
+.btn-next:disabled{opacity:0.3;cursor:default}
+.btn-back-step{background:none;border:none;color:var(--stone);font-family:var(--sans);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;padding:0.75rem 0 0;transition:color 0.2s;display:block}
+.btn-back-step:hover{color:var(--white)}
+
+/* SUMMARY BOX */
+.summary-box{background:rgba(200,192,180,0.05);border:0.5px solid rgba(200,192,180,0.15);padding:1.5rem;margin-bottom:1.5rem}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:0.5px solid rgba(200,192,180,0.08)}
+.summary-row:last-child{border-bottom:none}
+.summary-label{font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--stone)}
+.summary-val{font-family:var(--serif);font-size:0.95rem;color:var(--white)}
+
+/* CALENDLY EMBED */
+.calendly-section{margin-top:1rem}
+.calendly-note{font-size:0.78rem;color:var(--stone);line-height:1.7;margin-bottom:1.5rem;padding:1rem;border:0.5px solid rgba(200,192,180,0.15);background:rgba(200,192,180,0.03)}
+.calendly-placeholder{border:0.5px dashed rgba(200,192,180,0.25);padding:3rem 2rem;text-align:center;margin-bottom:1.5rem}
+.calendly-placeholder p{font-size:0.82rem;color:var(--stone);line-height:1.8}
+.calendly-placeholder code{font-family:monospace;font-size:0.78rem;background:rgba(200,192,180,0.08);padding:0.2rem 0.5rem;color:var(--accent);display:inline-block;margin-top:0.5rem}
+
+/* SUCCESS */
+.success-screen{display:none;text-align:center;padding:2rem 0}
+.success-icon{width:56px;height:56px;border:0.5px solid var(--stone);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 2rem;font-size:1.5rem}
+.success-title{font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--white);margin-bottom:1rem}
+.success-sub{font-size:0.85rem;color:var(--stone);line-height:1.8;max-width:360px;margin:0 auto 2rem}
+
+/* FOOTER */
+footer{background:var(--black);border-top:0.5px solid rgba(200,192,180,0.12);padding:2rem 3rem;display:flex;justify-content:space-between;align-items:center}
+.footer-logo{font-family:var(--serif);font-size:1rem;font-weight:300;letter-spacing:0.15em;text-transform:uppercase;color:var(--stone)}
+.footer-copy{font-size:0.7rem;color:rgba(200,192,180,0.3);letter-spacing:0.08em}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Surface Studio</a>
+  <a href="index.html" class="nav-back">← Tilbage til forsiden</a>
+</nav>
+
+<div class="booking-page">
+  <!-- LEFT: info panel -->
+  <div class="booking-left">
+    <div class="booking-eyebrow">Gratis & uforpligtende</div>
+    <h1 class="booking-title">Book et<br><em>strategimøde</em></h1>
+    <p class="booking-sub">30 minutters online møde hvor vi gennemgår din kliniks nuværende tilstedeværelse og hvad vi kan gøre for dig.</p>
+    <div class="booking-perks">
+      <div class="perk">
+        <div class="perk-dot"></div>
+        <div class="perk-text">Helt gratis og uforpligtende</div>
+      </div>
+      <div class="perk">
+        <div class="perk-dot"></div>
+        <div class="perk-text">30 minutter online — du bestemmer tidspunktet</div>
+      </div>
+      <div class="perk">
+        <div class="perk-dot"></div>
+        <div class="perk-text">Vi gennemgår din nuværende markedsføring</div>
+      </div>
+      <div class="perk">
+        <div class="perk-dot"></div>
+        <div class="perk-text">Du får konkrete anbefalinger — uanset om vi arbejder sammen</div>
+      </div>
+      <div class="perk">
+        <div class="perk-dot"></div>
+        <div class="perk-text">Svar inden for 24 timer</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: booking flow -->
+  <div class="booking-right">
+    <div class="steps-indicator">
+      <div class="step-dot active" id="dot-1"></div>
+      <div class="step-dot" id="dot-2"></div>
+      <div class="step-dot" id="dot-3"></div>
+      <span class="step-label" id="step-label">Vælg ydelse</span>
+    </div>
+
+    <!-- STEP 1: Choose service -->
+    <div class="step active" id="step-1">
+      <div class="step-title">Hvad handler mødet om?</div>
+      <p class="step-sub">Vælg den ydelse du er mest interesseret i — vi tilpasser mødet derefter.</p>
+      <div class="service-options">
+        <label class="service-option" onclick="selectService(this,'Kortfilm & Reels')">
+          <input type="radio" name="service" value="Kortfilm & Reels">
+          <div>
+            <div class="service-option-name">Kortfilm & Reels</div>
+            <div class="service-option-desc">Professionelt videoindhold til sociale medier</div>
+          </div>
+          <div class="service-check"></div>
+        </label>
+        <label class="service-option" onclick="selectService(this,'Betalt Annoncering')">
+          <input type="radio" name="service" value="Betalt Annoncering">
+          <div>
+            <div class="service-option-name">Betalt Annoncering</div>
+            <div class="service-option-desc">Meta Ads og Google Ads der konverterer</div>
+          </div>
+          <div class="service-check"></div>
+        </label>
+        <label class="service-option" onclick="selectService(this,'Social Media Management')">
+          <input type="radio" name="service" value="Social Media Management">
+          <div>
+            <div class="service-option-name">Social Media Management</div>
+            <div class="service-option-desc">Komplet styring af din sociale tilstedeværelse</div>
+          </div>
+          <div class="service-check"></div>
+        </label>
+        <label class="service-option" onclick="selectService(this,'Alt ovenstående')">
+          <input type="radio" name="service" value="Alt ovenstående">
+          <div>
+            <div class="service-option-name">Alt ovenstående</div>
+            <div class="service-option-desc">En samlet pakke — lad os tale om hvad der passer dig</div>
+          </div>
+          <div class="service-check"></div>
+        </label>
+      </div>
+      <button class="btn-next" id="next-1" onclick="goStep(2)" disabled>Næste: Vælg dato →</button>
+    </div>
+
+    <!-- STEP 2: Date & time -->
+    <div class="step" id="step-2">
+      <div class="step-title">Vælg dato & tid</div>
+      <p class="step-sub">Alle tider er danske (CET/CEST). Mødet varer 30 minutter.</p>
+
+      <!-- Calendar -->
+      <div class="calendar-wrap">
+        <div class="cal-header">
+          <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+          <span class="cal-month" id="cal-month-label"></span>
+          <button class="cal-nav" onclick="changeMonth(1)">›</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+
+      <!-- Time slots (shown after date pick) -->
+      <div id="time-section" style="display:none">
+        <div style="font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--stone);margin-bottom:0.75rem">Ledige tider</div>
+        <div class="time-slots" id="time-slots"></div>
+      </div>
+
+      <button class="btn-next" id="next-2" onclick="goStep(3)" disabled>Næste: Dine oplysninger →</button>
+      <button class="btn-back-step" onclick="goStep(1)">← Tilbage</button>
+    </div>
+
+    <!-- STEP 3: Contact details + Calendly note -->
+    <div class="step" id="step-3">
+      <div class="step-title">Dine oplysninger</div>
+      <p class="step-sub">Så kan vi bekræfte din booking og sende mødelinket.</p>
+
+      <div class="summary-box">
+        <div class="summary-row">
+          <span class="summary-label">Ydelse</span>
+          <span class="summary-val" id="sum-service">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Dato</span>
+          <span class="summary-val" id="sum-date">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Tidspunkt</span>
+          <span class="summary-val" id="sum-time">—</span>
+        </div>
+      </div>
+
+      <!-- Calendly note for you (owner) -->
+      <div class="calendly-note">
+        <strong style="font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent)">Opsætning af kalender</strong><br>
+        Erstat Calendly-linket nedenfor med dit eget når du har oprettet din konto på calendly.com. Skift <code style="font-family:monospace;font-size:0.78rem;background:rgba(200,192,180,0.1);padding:0.1rem 0.4rem">DIT_CALENDLY_LINK</code> i booking.html linje ~310.
+      </div>
+
+      <!-- Formspree form with hidden fields -->
+      <form id="booking-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <input type="hidden" name="ydelse" id="field-service">
+        <input type="hidden" name="dato" id="field-date">
+        <input type="hidden" name="tidspunkt" id="field-time">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Navn *</label>
+            <input type="text" name="navn" placeholder="Dit fulde navn" required>
+          </div>
+          <div class="form-group">
+            <label>Klinik / Salon *</label>
+            <input type="text" name="virksomhed" placeholder="Virksomhedsnavn" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" name="email" placeholder="din@email.dk" required>
+        </div>
+        <div class="form-group">
+          <label>Telefon</label>
+          <input type="tel" name="telefon" placeholder="+45 00 00 00 00">
+        </div>
+        <div class="form-group">
+          <label>Noget vi skal vide på forhånd?</label>
+          <textarea name="noter" placeholder="Valgfrit — f.eks. din kliniks størrelse, nuværende markedsføring..."></textarea>
+        </div>
+        <button type="submit" class="btn-next" id="submit-btn">Bekræft booking →</button>
+        <button type="button" class="btn-back-step" onclick="goStep(2)">← Tilbage</button>
+      </form>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-screen" id="success">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Booking <em>bekræftet</em></div>
+      <p class="success-sub">Tak! Vi har modtaget din booking og sender dig en kalenderinvitation inden for 24 timer med mødelink og bekræftelse.</p>
+      <a href="index.html" style="display:inline-block;margin-top:1rem;font-size:0.78rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--stone);text-decoration:none;border-bottom:0.5px solid rgba(200,192,180,0.3);padding-bottom:2px">← Tilbage til forsiden</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="footer-logo">Surface Studio</span>
+  <span class="footer-copy">© 2025 Surface Studio · Danmark</span>
+</footer>
+
+<script>
+// STATE
+let state = { service: null, date: null, time: null }
+let calYear, calMonth
+const today = new Date()
+
+// INIT
+calYear = today.getFullYear()
+calMonth = today.getMonth()
+renderCalendar()
+
+function selectService(el, val) {
+  document.querySelectorAll('.service-option').forEach(o => o.classList.remove('selected'))
+  el.classList.add('selected')
+  state.service = val
+  document.getElementById('next-1').disabled = false
+}
+
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'))
+  document.getElementById('step-'+n).classList.add('active')
+  const labels = ['','Vælg ydelse','Vælg dato','Dine oplysninger']
+  document.getElementById('step-label').textContent = labels[n]
+  for(let i=1;i<=3;i++){
+    const dot = document.getElementById('dot-'+i)
+    dot.classList.remove('active','done')
+    if(i < n) dot.classList.add('done')
+    else if(i === n) dot.classList.add('active')
+  }
+  if(n === 3) {
+    document.getElementById('sum-service').textContent = state.service || '—'
+    document.getElementById('sum-date').textContent = state.date ? formatDate(state.date) : '—'
+    document.getElementById('sum-time').textContent = state.time || '—'
+    document.getElementById('field-service').value = state.service || ''
+    document.getElementById('field-date').value = state.date ? formatDate(state.date) : ''
+    document.getElementById('field-time').value = state.time || ''
+  }
+}
+
+// CALENDAR
+const dayNames = ['Ma','Ti','On','To','Fr','Lø','Sø']
+const monthNames = ['Januar','Februar','Marts','April','Maj','Juni','Juli','August','September','Oktober','November','December']
+
+function renderCalendar() {
+  document.getElementById('cal-month-label').textContent = monthNames[calMonth] + ' ' + calYear
+  const grid = document.getElementById('cal-grid')
+  grid.innerHTML = ''
+  dayNames.forEach(d => {
+    const el = document.createElement('div')
+    el.className = 'cal-day-name'
+    el.textContent = d
+    grid.appendChild(el)
+  })
+  const first = new Date(calYear, calMonth, 1)
+  let startDay = first.getDay() - 1
+  if(startDay < 0) startDay = 6
+  for(let i=0;i<startDay;i++){
+    const el = document.createElement('div')
+    el.className = 'cal-day empty'
+    grid.appendChild(el)
+  }
+  const days = new Date(calYear, calMonth+1, 0).getDate()
+  for(let d=1;d<=days;d++){
+    const el = document.createElement('div')
+    el.className = 'cal-day'
+    el.textContent = d
+    const thisDate = new Date(calYear, calMonth, d)
+    const isPast = thisDate < new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    const isWeekend = thisDate.getDay() === 0 || thisDate.getDay() === 6
+    if(isPast || isWeekend) {
+      el.classList.add('past')
+    } else {
+      if(thisDate.toDateString() === today.toDateString()) el.classList.add('today')
+      el.addEventListener('click', () => selectDate(el, thisDate))
+    }
+    grid.appendChild(el)
+  }
+}
+
+function selectDate(el, date) {
+  document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'))
+  el.classList.add('selected')
+  state.date = date
+  state.time = null
+  renderTimeSlots()
+  document.getElementById('time-section').style.display = 'block'
+  document.getElementById('next-2').disabled = true
+}
+
+function renderTimeSlots() {
+  const slots = ['09:00','09:30','10:00','10:30','11:00','11:30','13:00','13:30','14:00','14:30','15:00','15:30']
+  const container = document.getElementById('time-slots')
+  container.innerHTML = ''
+  slots.forEach(t => {
+    const el = document.createElement('div')
+    el.className = 'time-slot'
+    el.textContent = t
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'))
+      el.classList.add('selected')
+      state.time = t
+      document.getElementById('next-2').disabled = false
+    })
+    container.appendChild(el)
+  })
+}
+
+function changeMonth(dir) {
+  calMonth += dir
+  if(calMonth > 11){ calMonth = 0; calYear++ }
+  if(calMonth < 0){ calMonth = 11; calYear-- }
+  renderCalendar()
+}
+
+function formatDate(d) {
+  return d.getDate() + '. ' + monthNames[d.getMonth()] + ' ' + d.getFullYear()
+}
+
+// FORM SUBMIT
+document.getElementById('booking-form').addEventListener('submit', async function(e) {
+  e.preventDefault()
+  const btn = document.getElementById('submit-btn')
+  btn.textContent = 'Sender...'
+  btn.disabled = true
+  try {
+    const res = await fetch(this.action, {method:'POST',body:new FormData(this),headers:{Accept:'application/json'}})
+    if(res.ok) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'))
+      document.getElementById('steps-indicator') && (document.querySelector('.steps-indicator').style.display='none')
+      document.getElementById('success').style.display = 'block'
+    } else {
+      btn.textContent = 'Noget gik galt — prøv igen'
+      btn.disabled = false
+    }
+  } catch {
+    btn.textContent = 'Noget gik galt — prøv igen'
+    btn.disabled = false
+  }
+})
+</script>
+</body>
+</html>
